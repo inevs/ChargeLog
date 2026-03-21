@@ -5,16 +5,27 @@ struct MainView: View {
     @Environment(\.modelContext) private var modelContext
 
     var body: some View {
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundStyle(.tint)
-            Text("Hello, world!")
+        TabView {
+            Tab("Dashboard", systemImage: "bolt.circle.fill") {
+                Text("My Statistics")
+            }
+            Tab("Charging Stations", systemImage: "ev.charger.fill") {
+                Text("List of Charging Stations")
+            }
+            Tab("Sessions", systemImage: "clock.fill") {
+                ChargingSessionsListView()
+            }
+            Tab("Settings", systemImage: "gearshape.fill") {
+                Text("Here we change our settings")
+            }
         }
-        .padding()
     }
 }
 
-#Preview {
+#Preview("Empty State", traits: .modifier(EmptyPersistencePreview())) {
+    MainView()
+}
+
+#Preview("Sample Data", traits: .modifier(SampleDataPersistencePreview())) {
     MainView()
 }

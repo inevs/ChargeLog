@@ -1,5 +1,6 @@
 import Foundation
 import SwiftData
+import SwiftUI
 
 @Model
 class ChargeSession {
@@ -32,10 +33,42 @@ class ChargeSession {
         self.createdAt = .now
         self.updatedAt = .now
     }
+    
+    @Transient var amount: Double {
+        self.energyKwh * self.chargeTariff.pricePerKwh
+    }
 }
 
 enum PaymentStatus: String, Codable {
     case open, paid
+    
+    var name: String {
+        switch self {
+        case .open: "offen"
+        case .paid: "bezahlt"
+        }
+    }
+    
+    var foregroundStyle: Color {
+        switch self {
+        case .open: Color.white
+        case .paid: Color.green
+        }
+    }
+    
+    var backgroundFill: Color {
+        switch self {
+        case .open: Color.orange
+        case .paid: Color.green.opacity(0.15)
+        }
+    }
+    
+    var backgroundOverlay: Color {
+        switch self {
+        case .open: Color.clear
+        case .paid: Color.green.opacity(0.4)
+        }
+    }
 }
 
 extension ChargeSession {
