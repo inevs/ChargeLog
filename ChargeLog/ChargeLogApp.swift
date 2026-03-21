@@ -1,17 +1,21 @@
-//
-//  ChargeLogApp.swift
-//  ChargeLog
-//
-//  Created by Sven Günther on 21.03.26.
-//
-
 import SwiftUI
+import SwiftData
 
 @main
 struct ChargeLogApp: App {
+    let persistenceManager = PersistenceManager()
+    
+    init() {
+        if let url = persistenceManager.modelContainer.configurations.first?.url {
+            print("Database location: \(url.path)")
+        }
+    }
+
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            MainView()
+            .environment(persistenceManager)
+            .modelContainer(persistenceManager.modelContainer)
         }
     }
 }
