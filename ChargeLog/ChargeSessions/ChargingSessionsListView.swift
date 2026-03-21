@@ -17,7 +17,6 @@ struct ChargingSessionsListView: View {
                 }
             }
             .navigationTitle("Ladevorgänge")
-//            .navigationSubtitle("Tracking your electric journey.")
             .navigationDestination(for: ChargeSession.self) { session in
                 ChargeSessionDetailView(session: session)
             }
@@ -85,7 +84,7 @@ struct ChargeSessionRow: View {
 
                 Spacer()
 
-                PaymentBadge(status: session.paymentStatus)
+                StatusBadge(status: session.sessionStatus)
             }
 
             Divider()
@@ -104,7 +103,7 @@ struct ChargeSessionRow: View {
 
                 Spacer()
 
-                if session.paymentStatus == .open {
+                if session.sessionStatus == .finished {
                     Button("Bezahlen") {}
                         .buttonStyle(.borderedProminent)
                         .controlSize(.regular)
@@ -163,21 +162,15 @@ private struct MetricColumn: View {
     }
 }
 
-struct PaymentBadge: View {
-    let status: PaymentStatus
+struct StatusBadge: View {
+    let status: SessionStatus
 
     var body: some View {
-        HStack(spacing: 4) {
-            if status == .paid {
-                Image(systemName: "checkmark.circle.fill")
-                    .font(.caption)
-            }
-            Text(status.name.uppercased())
-                .font(.caption)
-                .fontWeight(.semibold)
-        }
-        .padding(.horizontal, 10)
-        .padding(.vertical, 5)
+        Text(status.name.uppercased())
+            .font(.caption)
+            .fontWeight(.semibold)
+            .frame(width: 64)
+            .padding(.vertical, 5)
         .foregroundStyle(status.foregroundStyle)
         .background(
             RoundedRectangle(cornerRadius: 20)
@@ -185,7 +178,7 @@ struct PaymentBadge: View {
         )
         .overlay(
             RoundedRectangle(cornerRadius: 20)
-                .stroke(status.backgroundFill, lineWidth: 1)
+                .stroke(status.backgroundOverlay, lineWidth: 1)
         )
     }
 }

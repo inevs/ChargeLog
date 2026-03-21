@@ -12,7 +12,7 @@ class ChargeSession {
     var socStart: Double
     var socEnd: Double?
     var billedDate: Date?
-    var paymentStatus: PaymentStatus
+    var sessionStatus: SessionStatus
     var chargingStation: ChargeStation
     var chargeTariff: ChargeTariff
     var createdAt: Date = Date()
@@ -27,7 +27,7 @@ class ChargeSession {
         self.socStart = socStart
         self.socEnd = nil
         self.billedDate = nil
-        self.paymentStatus = .open
+        self.sessionStatus = .running
         self.chargingStation = chargingStation
         self.chargeTariff = chargeTariff
         self.createdAt = .now
@@ -39,34 +39,38 @@ class ChargeSession {
     }
 }
 
-enum PaymentStatus: String, Codable {
-    case open, paid
+enum SessionStatus: String, Codable {
+    case running, finished, paid
     
     var name: String {
         switch self {
-        case .open: "offen"
+        case .running: "laufend"
+        case .finished: "beendet"
         case .paid: "bezahlt"
         }
     }
     
     var foregroundStyle: Color {
         switch self {
-        case .open: Color.white
-        case .paid: Color.green
+        case .running: Color.accentColor
+        case .finished: Color.secondary
+        case .paid: Color(hue: 0.38, saturation: 0.75, brightness: 0.38)
         }
     }
     
     var backgroundFill: Color {
         switch self {
-        case .open: Color.orange
-        case .paid: Color.green.opacity(0.15)
+        case .running: Color.accentColor.opacity(0.15)
+        case .finished: Color.secondary.opacity(0.12)
+        case .paid: Color(hue: 0.38, saturation: 0.65, brightness: 0.5).opacity(0.15)
         }
     }
     
     var backgroundOverlay: Color {
         switch self {
-        case .open: Color.clear
-        case .paid: Color.green.opacity(0.4)
+        case .running: Color.accentColor.opacity(0.55)
+        case .finished: Color.secondary.opacity(0.45)
+        case .paid: Color(hue: 0.38, saturation: 0.65, brightness: 0.5).opacity(0.55)
         }
     }
 }
@@ -81,7 +85,7 @@ extension ChargeSession {
         session1.startTime = Date(timeIntervalSinceNow: -3600 * 24 * 5 - 2700)
         session1.energyKwh = 52.4
         session1.socEnd = 0.85
-        session1.paymentStatus = .paid
+        session1.sessionStatus = .paid
         session1.billedDate = Date(timeIntervalSinceNow: -3600 * 24 * 3)
 
         let session2 = ChargeSession(odometerKm: 12850, socStart: 0.22, chargingStation: stations[1], chargeTariff: tariffs[0])
@@ -89,7 +93,7 @@ extension ChargeSession {
         session2.startTime = Date(timeIntervalSinceNow: -3600 * 24 * 2 - 1800)
         session2.energyKwh = 38.7
         session2.socEnd = 0.79
-        session2.paymentStatus = .paid
+        session2.sessionStatus = .paid
         session2.billedDate = Date(timeIntervalSinceNow: -3600 * 24 * 1)
 
         let session3 = ChargeSession(odometerKm: 13200, socStart: 0.31, chargingStation: stations[2], chargeTariff: tariffs[2])
@@ -97,7 +101,7 @@ extension ChargeSession {
         session3.startTime = Date(timeIntervalSinceNow: -3600 * 5 - 3600)
         session3.energyKwh = 61.0
         session3.socEnd = 0.95
-        session3.paymentStatus = .open
+        session3.sessionStatus = .finished
 
         let session4 = ChargeSession(odometerKm: 13250, socStart: 0.15, chargingStation: stations[4], chargeTariff: tariffs[4])
         // session4 is still in progress — no endTime, no socEnd
