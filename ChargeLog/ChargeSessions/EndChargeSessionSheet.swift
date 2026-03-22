@@ -2,6 +2,8 @@ import SwiftUI
 
 struct EndChargeSessionSheet: View {
     @Environment(\.dismiss) private var dismiss
+    @AppStorage("batteryCapacityKwh") private var batteryCapacityKwh: Double = 0
+
     let session: ChargeSession
 
     // Felder aus dem Start – korrigierbar
@@ -28,6 +30,14 @@ struct EndChargeSessionSheet: View {
 
     private var energyKwh: Double {
         Double(energyKwhText.replacingOccurrences(of: ",", with: ".")) ?? 0
+    }
+
+    /// Berechnet Energie aus SoC-Delta und Batteriegröße (falls konfiguriert)
+    private var calculatedEnergyKwh: Double? {
+        guard batteryCapacityKwh > 0 else { return nil }
+        let delta = socEnd - socStart
+        guard delta > 0 else { return nil }
+        return delta * batteryCapacityKwh
     }
 
     private var canFinish: Bool {
@@ -63,21 +73,14 @@ struct EndChargeSessionSheet: View {
                         }
                         Slider(value: $socStart, in: 0...1, step: 0.01)
                             .tint(Color("Electric Blue"))
+                            .onChange(of: socStart) { _, _ in
+                                updateCalculatedEnergy()
+                            }
                     }
                 }
 
                 Section("Ende") {
                     DatePicker("Endzeit", selection: $endTime, in: startTime..., displayedComponents: [.date, .hourAndMinute])
-
-                    HStack {
-                        Text("Geladene Energie")
-                        Spacer()
-                        TextField("z.B. 48,5", text: $energyKwhText)
-                            .keyboardType(.decimalPad)
-                            .multilineTextAlignment(.trailing)
-                        Text("kWh")
-                            .foregroundStyle(.secondary)
-                    }
 
                     VStack(alignment: .leading, spacing: 6) {
                         HStack {
@@ -89,11 +92,32 @@ struct EndChargeSessionSheet: View {
                         }
                         Slider(value: $socEnd, in: 0...1, step: 0.01)
                             .tint(Color("Electric Blue"))
+                            .onChange(of: socEnd) { _, _ in
+                                updateCalculatedEnergy()
+                            }
+                    }
+
+                    HStack {
+                        Text("Geladene Energie")
+                        Spacer()
+                        TextField("z.B. 48,5", text: $energyKwhText)
+                            .keyboardType(.decimalPad)
+                            .multilineTextAlignment(.trailing)
+                        Text("kWh")
+                            .foregroundStyle(.secondary)
+                    }
+                    if let calculated = calculatedEnergyKwh {
+                        Text("Berechnet aus SoC-Delta: \(String(format: "%.1f", calculated)) kWh")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
                     }
                 }
             }
             .navigationTitle("Ladevorgang beenden")
             .navigationBarTitleDisplayMode(.inline)
+            .onAppear {
+                updateCalculatedEnergy()
+            }
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Abbrechen") { dismiss() }
@@ -107,6 +131,13 @@ struct EndChargeSessionSheet: View {
                 }
             }
         }
+    }
+
+    /// Füllt das Energie-Textfeld mit dem aus SoC-Delta berechneten Wert vor,
+    /// sofern der Nutzer noch keinen eigenen Wert eingetragen hat.
+    private func updateCalculatedEnergy() {
+        guard let calculated = calculatedEnergyKwh else { return }
+        energyKwhText = String(format: "%.1f", calculated).replacingOccurrences(of: ".", with: ",")
     }
 
     private func finishSession() {

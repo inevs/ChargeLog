@@ -127,11 +127,15 @@ struct ChargeSessionRow: View {
                         .buttonStyle(.borderedProminent)
                         .controlSize(.regular)
                         .tint(Color("Growth Green"))
+                        .lineLimit(1)
+                        .fixedSize()
                 case .paid:
-                    Image(systemName: "chevron.right")
-                        .foregroundStyle(.tertiary)
-                        .font(.footnote)
+                    EmptyView()
                 }
+
+                Image(systemName: "chevron.right")
+                    .foregroundStyle(.tertiary)
+                    .font(.footnote)
             }
         }
         .padding(16)
@@ -166,6 +170,8 @@ private struct MetricColumn: View {
                         .foregroundStyle(.secondary)
                 }
             }
+            .lineLimit(1)
+            .fixedSize()
         }
     }
 }
