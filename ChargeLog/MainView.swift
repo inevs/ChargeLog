@@ -7,7 +7,7 @@ struct MainView: View {
     var body: some View {
         TabView {
             Tab("Dashboard", systemImage: "bolt.circle.fill") {
-                Text("My Statistics")
+                StatisticsView()
             }
             Tab("Charging Stations", systemImage: "ev.charger.fill") {
                 NavigationStack {
