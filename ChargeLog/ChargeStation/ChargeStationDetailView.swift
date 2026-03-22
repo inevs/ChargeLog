@@ -10,7 +10,6 @@ struct ChargeStationDetailView: View {
     @State private var isEditing = false
     @State private var editName: String = ""
     @State private var editType: ChargeStationType = .fastDC
-    @State private var editIsFavorite: Bool = false
 
     private var canSave: Bool { !editName.trimmingCharacters(in: .whitespaces).isEmpty }
 
@@ -42,13 +41,6 @@ struct ChargeStationDetailView: View {
             }
 
             if isEditing {
-                Section {
-                    Toggle(isOn: $editIsFavorite) {
-                        Label("Favorit", systemImage: "star")
-                    }
-                    .tint(.yellow)
-                }
-
                 Section("Typ") {
                     Picker("Ladetyp", selection: $editType) {
                         ForEach(ChargeStationType.allCases, id: \.self) { t in
@@ -65,7 +57,17 @@ struct ChargeStationDetailView: View {
             } else {
                 Section("Details") {
                     LabeledContent("Typ", value: station.type.label)
-                    LabeledContent("Favorit", value: station.isFavorite ? "Ja" : "Nein")
+                    Toggle(isOn: Binding(
+                        get: { station.isFavorite },
+                        set: { newValue in
+                            station.isFavorite = newValue
+                            station.updatedAt = .now
+                            try? modelContext.save()
+                        }
+                    )) {
+                        Label("Favorit", systemImage: "star")
+                    }
+                    .tint(.yellow)
                     LabeledContent("Hinzugefügt", value: station.createdAt.formatted(date: .abbreviated, time: .omitted))
                     LabeledContent("Zuletzt geändert", value: station.updatedAt.formatted(date: .abbreviated, time: .omitted))
                 }
@@ -111,14 +113,12 @@ struct ChargeStationDetailView: View {
     private func startEditing() {
         editName = station.name
         editType = station.type
-        editIsFavorite = station.isFavorite
         isEditing = true
     }
 
     private func saveChanges() {
         station.name = editName.trimmingCharacters(in: .whitespaces)
         station.type = editType
-        station.isFavorite = editIsFavorite
         station.updatedAt = .now
         try? modelContext.save()
         isEditing = false
