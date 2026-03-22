@@ -41,6 +41,14 @@ enum ChargeStationType: String, Codable, CaseIterable {
         case .standardAC: "Growth Green"
         }
     }
+    
+    var label: String {
+        switch self {
+        case .standardAC: "AC Standard"
+        case .fastDC: "DC Schnelllader"
+        case .powerDC: "DC High Power"
+        }
+    }
 }
 
 extension ChargeStation {

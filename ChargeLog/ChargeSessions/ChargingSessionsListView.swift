@@ -4,8 +4,13 @@ import SwiftData
 struct ChargingSessionsListView: View {
     @Environment(\.modelContext) private var modelContext
     @State private var showAddSessionSheet = false
+
     @Query(sort: \ChargeSession.startTime, order: .reverse)
     private var chargeSessions: [ChargeSession]
+
+    private var hasRunningSession: Bool {
+        chargeSessions.contains { $0.sessionStatus == .running }
+    }
 
     var body: some View {
         NavigationStack {
@@ -27,7 +32,11 @@ struct ChargingSessionsListView: View {
                     } label: {
                         Image(systemName: "plus")
                     }
+                    .disabled(hasRunningSession)
                 }
+            }
+            .sheet(isPresented: $showAddSessionSheet) {
+                NewChargeSessionSheet()
             }
         }
     }
@@ -62,12 +71,14 @@ struct ChargingSessionsListView: View {
                 Label("Ladevorgang hinzufügen", systemImage: "plus")
             }
             .buttonStyle(.borderedProminent)
+            .tint(Color("Electric Blue"))
         }
     }
 }
 
 struct ChargeSessionRow: View {
     let session: ChargeSession
+    @State private var showEndSheet = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -97,17 +108,26 @@ struct ChargeSessionRow: View {
                 )
                 MetricColumn(
                     label: "BETRAG",
-                    value: String(format: "%.2f €", session.amount),
-                    unit: nil
+                    value: String(format: "%.2f", session.amount),
+                    unit: "EUR"
                 )
 
                 Spacer()
 
-                if session.sessionStatus == .finished {
+                switch session.sessionStatus {
+                case .running:
+                    Button("Beenden") {
+                        showEndSheet = true
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .controlSize(.regular)
+                    .tint(Color("Electric Blue"))
+                case .finished:
                     Button("Bezahlen") {}
                         .buttonStyle(.borderedProminent)
                         .controlSize(.regular)
-                } else {
+                        .tint(Color("Growth Green"))
+                case .paid:
                     Image(systemName: "chevron.right")
                         .foregroundStyle(.tertiary)
                         .font(.footnote)
@@ -118,20 +138,8 @@ struct ChargeSessionRow: View {
         .background(Color("background"))
         .clipShape(RoundedRectangle(cornerRadius: 16))
         .shadow(color: .black.opacity(0.06), radius: 6, x: 0, y: 2)
-    }
-}
-
-private struct StationIcon: View {
-    let type: ChargeStationType
-
-    var body: some View {
-        ZStack {
-            RoundedRectangle(cornerRadius: 12)
-                .fill(Color(type.backgroundColor))
-                .frame(width: 48, height: 48)
-            Image(systemName: type.symbolName)
-                .foregroundStyle(.white)
-                .font(.title3)
+        .sheet(isPresented: $showEndSheet) {
+            EndChargeSessionSheet(session: session)
         }
     }
 }
