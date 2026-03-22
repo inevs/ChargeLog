@@ -8,13 +8,17 @@ struct NewChargeSessionSheet: View {
     @Query(sort: \ChargeStation.name) private var stations: [ChargeStation]
     @Query(sort: \ChargeTariff.name) private var tariffs: [ChargeTariff]
 
-    @AppStorage("tariffPickerFavoritesOnly") private var favoritesOnly: Bool = false
+    @AppStorage("stationPickerFavoritesOnly") private var stationFavoritesOnly: Bool = false
+    @AppStorage("tariffPickerFavoritesOnly") private var tariffFavoritesOnly: Bool = false
 
     @State private var selectedStation: ChargeStation?
     @State private var selectedTariff: ChargeTariff?
 
+    private var visibleStations: [ChargeStation] {
+        stationFavoritesOnly ? stations.filter { $0.isFavorite } : stations
+    }
     private var visibleTariffs: [ChargeTariff] {
-        favoritesOnly ? tariffs.filter { $0.isFavorite } : tariffs
+        tariffFavoritesOnly ? tariffs.filter { $0.isFavorite } : tariffs
     }
     @State private var socStart: Double = 0.2
     @State private var odometerKm: Int = 0
@@ -30,14 +34,14 @@ struct NewChargeSessionSheet: View {
     var body: some View {
         NavigationStack {
             Form {
-                Section("Ladestation") {
-                    if stations.isEmpty {
-                        Text("Keine Ladestationen vorhanden")
+                Section {
+                    if visibleStations.isEmpty {
+                        Text(stationFavoritesOnly ? "Keine Favoriten vorhanden" : "Keine Ladestationen vorhanden")
                             .foregroundStyle(.secondary)
                     } else {
                         Picker("Station", selection: $selectedStation) {
                             Text("Bitte wählen").tag(Optional<ChargeStation>(nil))
-                            ForEach(stations) { station in
+                            ForEach(visibleStations) { station in
                                 Label(station.name, systemImage: station.type.symbolName)
                                     .tag(Optional(station))
                             }
@@ -49,11 +53,30 @@ struct NewChargeSessionSheet: View {
                         Label("Neue Ladestation", systemImage: "plus.circle")
                             .foregroundStyle(Color("Electric Blue"))
                     }
+                } header: {
+                    HStack {
+                        Text("Ladestation")
+                        Spacer()
+                        Button {
+                            stationFavoritesOnly.toggle()
+                            if let selected = selectedStation, !visibleStations.contains(where: { $0.id == selected.id }) {
+                                selectedStation = visibleStations.first
+                            }
+                        } label: {
+                            Label(
+                                stationFavoritesOnly ? "Nur Favoriten" : "Alle",
+                                systemImage: stationFavoritesOnly ? "star.fill" : "star"
+                            )
+                            .labelStyle(.titleAndIcon)
+                            .font(.caption)
+                            .foregroundStyle(stationFavoritesOnly ? .yellow : .secondary)
+                        }
+                    }
                 }
 
                 Section {
                     if visibleTariffs.isEmpty {
-                        Text(favoritesOnly ? "Keine Favoriten vorhanden" : "Keine Tarife vorhanden")
+                        Text(tariffFavoritesOnly ? "Keine Favoriten vorhanden" : "Keine Tarife vorhanden")
                             .foregroundStyle(.secondary)
                     } else {
                         Picker("Tarif", selection: $selectedTariff) {
@@ -75,19 +98,18 @@ struct NewChargeSessionSheet: View {
                         Text("Tarif")
                         Spacer()
                         Button {
-                            favoritesOnly.toggle()
-                            // Selektion zurücksetzen falls der gewählte Tarif nicht mehr sichtbar ist
+                            tariffFavoritesOnly.toggle()
                             if let selected = selectedTariff, !visibleTariffs.contains(where: { $0.id == selected.id }) {
                                 selectedTariff = visibleTariffs.first
                             }
                         } label: {
                             Label(
-                                favoritesOnly ? "Nur Favoriten" : "Alle",
-                                systemImage: favoritesOnly ? "star.fill" : "star"
+                                tariffFavoritesOnly ? "Nur Favoriten" : "Alle",
+                                systemImage: tariffFavoritesOnly ? "star.fill" : "star"
                             )
                             .labelStyle(.titleAndIcon)
                             .font(.caption)
-                            .foregroundStyle(favoritesOnly ? .yellow : .secondary)
+                            .foregroundStyle(tariffFavoritesOnly ? .yellow : .secondary)
                         }
                     }
                 }
@@ -136,7 +158,7 @@ struct NewChargeSessionSheet: View {
                 }
             }
             .onAppear {
-                if selectedStation == nil { selectedStation = stations.first }
+                if selectedStation == nil { selectedStation = visibleStations.first }
                 if selectedTariff == nil { selectedTariff = visibleTariffs.first }
             }
             .sheet(isPresented: $showNewStationSheet) {

@@ -10,7 +10,9 @@ struct MainView: View {
                 Text("My Statistics")
             }
             Tab("Charging Stations", systemImage: "ev.charger.fill") {
-                Text("List of Charging Stations")
+                NavigationStack {
+                    ChargeStationListView()
+                }
             }
             Tab("Sessions", systemImage: "clock.fill") {
                 ChargingSessionsListView()
