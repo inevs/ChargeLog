@@ -1,5 +1,7 @@
 import SwiftUI
 import SwiftData
+import MapKit
+import CoreLocation
 
 struct ChargeStationDetailView: View {
     @Environment(\.modelContext) private var modelContext
@@ -10,8 +12,16 @@ struct ChargeStationDetailView: View {
     @State private var isEditing = false
     @State private var editName: String = ""
     @State private var editType: ChargeStationType = .fastDC
+    @State private var editCoordinate: CLLocationCoordinate2D? = nil
+    @State private var showLocationPicker = false
 
     private var canSave: Bool { !editName.trimmingCharacters(in: .whitespaces).isEmpty }
+
+    /// Gibt die gespeicherte Koordinate zurück, wenn sie gültig ist (nicht 0,0)
+    private var savedCoordinate: CLLocationCoordinate2D? {
+        guard station.locationLat != 0 || station.locationLong != 0 else { return nil }
+        return CLLocationCoordinate2D(latitude: station.locationLat, longitude: station.locationLong)
+    }
 
     var body: some View {
         List {
@@ -54,6 +64,39 @@ struct ChargeStationDetailView: View {
                     .pickerStyle(.inline)
                     .labelsHidden()
                 }
+
+                Section("Standort") {
+                    let displayCoord = editCoordinate
+                    if let coord = displayCoord {
+                        Map(initialPosition: .region(MKCoordinateRegion(
+                            center: coord,
+                            latitudinalMeters: 800,
+                            longitudinalMeters: 800
+                        ))) {
+                            Marker("", coordinate: coord)
+                        }
+                        .frame(height: 150)
+                        .clipShape(RoundedRectangle(cornerRadius: 10))
+                        .listRowInsets(EdgeInsets(top: 8, leading: 8, bottom: 8, trailing: 8))
+                    }
+
+                    Button {
+                        showLocationPicker = true
+                    } label: {
+                        Label(
+                            editCoordinate != nil ? "Standort ändern" : "Standort festlegen",
+                            systemImage: "map"
+                        )
+                    }
+
+                    if editCoordinate != nil {
+                        Button(role: .destructive) {
+                            editCoordinate = nil
+                        } label: {
+                            Label("Standort entfernen", systemImage: "trash")
+                        }
+                    }
+                }
             } else {
                 Section("Details") {
                     LabeledContent("Typ", value: station.type.label)
@@ -70,6 +113,24 @@ struct ChargeStationDetailView: View {
                     .tint(.yellow)
                     LabeledContent("Hinzugefügt", value: station.createdAt.formatted(date: .abbreviated, time: .omitted))
                     LabeledContent("Zuletzt geändert", value: station.updatedAt.formatted(date: .abbreviated, time: .omitted))
+                }
+
+                if let coord = savedCoordinate {
+                    Section("Standort") {
+                        Map(initialPosition: .region(MKCoordinateRegion(
+                            center: coord,
+                            latitudinalMeters: 800,
+                            longitudinalMeters: 800
+                        ))) {
+                            Marker(station.name, coordinate: coord)
+                        }
+                        .frame(height: 180)
+                        .clipShape(RoundedRectangle(cornerRadius: 10))
+                        .listRowInsets(EdgeInsets(top: 8, leading: 8, bottom: 8, trailing: 8))
+
+                        LabeledContent("Breitengrad", value: String(format: "%.5f°", coord.latitude))
+                        LabeledContent("Längengrad", value: String(format: "%.5f°", coord.longitude))
+                    }
                 }
 
                 Section("Ladesessions") {
@@ -108,17 +169,25 @@ struct ChargeStationDetailView: View {
                 }
             }
         }
+        .sheet(isPresented: $showLocationPicker) {
+            LocationPickerView(initialCoordinate: editCoordinate) { coord in
+                editCoordinate = coord
+            }
+        }
     }
 
     private func startEditing() {
         editName = station.name
         editType = station.type
+        editCoordinate = savedCoordinate
         isEditing = true
     }
 
     private func saveChanges() {
         station.name = editName.trimmingCharacters(in: .whitespaces)
         station.type = editType
+        station.locationLat = editCoordinate?.latitude ?? 0
+        station.locationLong = editCoordinate?.longitude ?? 0
         station.updatedAt = .now
         try? modelContext.save()
         isEditing = false

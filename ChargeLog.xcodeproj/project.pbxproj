@@ -29,9 +29,22 @@
 		268A8B202F6EACE700D5EAE1 /* ChargeLogUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ChargeLogUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		2641D4242F6FFA0E00A7EF42 /* Exceptions for "ChargeLog" folder in "ChargeLog" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 268A8B082F6EACE600D5EAE1 /* ChargeLog */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		268A8B0B2F6EACE600D5EAE1 /* ChargeLog */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				2641D4242F6FFA0E00A7EF42 /* Exceptions for "ChargeLog" folder in "ChargeLog" target */,
+			);
 			path = ChargeLog;
 			sourceTree = "<group>";
 		};
@@ -391,6 +404,7 @@
 				DEVELOPMENT_TEAM = UDWCB532ZV;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = ChargeLog/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -427,6 +441,7 @@
 				DEVELOPMENT_TEAM = UDWCB532ZV;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = ChargeLog/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
