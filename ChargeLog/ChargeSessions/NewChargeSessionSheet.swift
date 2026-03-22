@@ -8,8 +8,14 @@ struct NewChargeSessionSheet: View {
     @Query(sort: \ChargeStation.name) private var stations: [ChargeStation]
     @Query(sort: \ChargeTariff.name) private var tariffs: [ChargeTariff]
 
+    @AppStorage("tariffPickerFavoritesOnly") private var favoritesOnly: Bool = false
+
     @State private var selectedStation: ChargeStation?
     @State private var selectedTariff: ChargeTariff?
+
+    private var visibleTariffs: [ChargeTariff] {
+        favoritesOnly ? tariffs.filter { $0.isFavorite } : tariffs
+    }
     @State private var socStart: Double = 0.2
     @State private var odometerKm: Int = 0
     @State private var odometerText: String = ""
@@ -45,14 +51,14 @@ struct NewChargeSessionSheet: View {
                     }
                 }
 
-                Section("Tarif") {
-                    if tariffs.isEmpty {
-                        Text("Keine Tarife vorhanden")
+                Section {
+                    if visibleTariffs.isEmpty {
+                        Text(favoritesOnly ? "Keine Favoriten vorhanden" : "Keine Tarife vorhanden")
                             .foregroundStyle(.secondary)
                     } else {
                         Picker("Tarif", selection: $selectedTariff) {
                             Text("Bitte wählen").tag(Optional<ChargeTariff>(nil))
-                            ForEach(tariffs) { tariff in
+                            ForEach(visibleTariffs) { tariff in
                                 Text(tariff.name)
                                     .tag(Optional(tariff))
                             }
@@ -63,6 +69,26 @@ struct NewChargeSessionSheet: View {
                     } label: {
                         Label("Neuer Tarif", systemImage: "plus.circle")
                             .foregroundStyle(Color("Electric Blue"))
+                    }
+                } header: {
+                    HStack {
+                        Text("Tarif")
+                        Spacer()
+                        Button {
+                            favoritesOnly.toggle()
+                            // Selektion zurücksetzen falls der gewählte Tarif nicht mehr sichtbar ist
+                            if let selected = selectedTariff, !visibleTariffs.contains(where: { $0.id == selected.id }) {
+                                selectedTariff = visibleTariffs.first
+                            }
+                        } label: {
+                            Label(
+                                favoritesOnly ? "Nur Favoriten" : "Alle",
+                                systemImage: favoritesOnly ? "star.fill" : "star"
+                            )
+                            .labelStyle(.titleAndIcon)
+                            .font(.caption)
+                            .foregroundStyle(favoritesOnly ? .yellow : .secondary)
+                        }
                     }
                 }
 
@@ -111,7 +137,7 @@ struct NewChargeSessionSheet: View {
             }
             .onAppear {
                 if selectedStation == nil { selectedStation = stations.first }
-                if selectedTariff == nil { selectedTariff = tariffs.first }
+                if selectedTariff == nil { selectedTariff = visibleTariffs.first }
             }
             .sheet(isPresented: $showNewStationSheet) {
                 NewChargeStationSheet { newStation in

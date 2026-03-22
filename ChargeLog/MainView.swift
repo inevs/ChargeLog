@@ -16,7 +16,7 @@ struct MainView: View {
                 ChargingSessionsListView()
             }
             Tab("Settings", systemImage: "gearshape.fill") {
-                Text("Here we change our settings")
+                SettingsView()
             }
         }
     }
