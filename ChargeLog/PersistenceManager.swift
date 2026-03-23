@@ -14,7 +14,8 @@ class PersistenceManager {
         let schema = Schema([
             ChargeStation.self,
             ChargeTariff.self,
-            ChargeSession.self
+            ChargeSession.self,
+            Vehicle.self
         ])
         let modelConfiguration = ModelConfiguration(
                     schema: schema,
@@ -35,6 +36,10 @@ class PersistenceManager {
         let sessions = ChargeSession.sampleData
         for session in sessions {
             context.insert(session)
+        }
+        let vehicles = Vehicle.sampleData
+        for vehicle in vehicles {
+            context.insert(vehicle)
         }
         try? context.save()
     }

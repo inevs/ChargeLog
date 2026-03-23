@@ -26,6 +26,11 @@ struct SettingsView: View {
 
                 Section("Stammdaten") {
                     NavigationLink {
+                        VehicleListView()
+                    } label: {
+                        Label("Fahrzeuge", systemImage: "car")
+                    }
+                    NavigationLink {
                         TariffsListView()
                     } label: {
                         Label("Tarife", systemImage: "creditcard")
