@@ -53,7 +53,7 @@ enum ChargeStationType: String, Codable, CaseIterable {
 }
 
 extension ChargeStation {
-    static var sampleData: [ChargeStation] = {
+    static var sampleData: [ChargeStation] {
         let munich = ChargeStation(name: "Tesla Supercharger Munich", locationLat: 48.1351, locationLong: 11.5820, type: .powerDC)
         munich.isFavorite = true
 
@@ -68,5 +68,5 @@ extension ChargeStation {
         cologne.isFavorite = true
 
         return [munich, hamburg, berlin, frankfurt, cologne]
-    }()
+    }
 }

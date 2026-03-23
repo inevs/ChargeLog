@@ -84,23 +84,31 @@ struct ChargeSessionRow: View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(alignment: .center, spacing: 12) {
                 StationIcon(type: session.chargingStation.type)
+                    .fixedSize()
                 VStack(alignment: .leading, spacing: 2) {
                     Text(session.chargingStation.name)
                         .font(.headline)
                         .foregroundStyle(.primary)
+                        .lineLimit(2)
                     Text(session.startTime.formatted(.dateTime.day().month(.twoDigits).year(.twoDigits).hour().minute()))
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
+                        .lineLimit(1)
                 }
+                .fixedSize(horizontal: false, vertical: true)
 
-                Spacer()
+                Spacer(minLength: 8)
 
                 StatusBadge(status: session.sessionStatus)
             }
 
             Divider()
 
-            HStack(spacing: 24) {
+            HStack(alignment: .top, spacing: 24) {
+                // Einrücken auf Breite des StationIcon (48) + spacing (12)
+                Color.clear
+                    .frame(width: 48 + 12, height: 0)
+
                 MetricColumn(
                     label: "ENERGIE",
                     value: String(format: "%.1f", session.energyKwh),
@@ -122,6 +130,8 @@ struct ChargeSessionRow: View {
                     .buttonStyle(.borderedProminent)
                     .controlSize(.regular)
                     .tint(Color("Electric Blue"))
+                    .lineLimit(1)
+                    .fixedSize()
                 case .finished:
                     Button("Bezahlen") {}
                         .buttonStyle(.borderedProminent)
@@ -142,6 +152,7 @@ struct ChargeSessionRow: View {
         .background(Color("background"))
         .clipShape(RoundedRectangle(cornerRadius: 16))
         .shadow(color: .black.opacity(0.06), radius: 6, x: 0, y: 2)
+        .containerRelativeFrame(.horizontal) { width, _ in width - 32 }
         .sheet(isPresented: $showEndSheet) {
             EndChargeSessionSheet(session: session)
         }

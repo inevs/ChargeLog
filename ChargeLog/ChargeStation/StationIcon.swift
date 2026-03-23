@@ -9,8 +9,10 @@ struct StationIcon: View {
                 .fill(Color(type.backgroundColor))
                 .frame(width: 48, height: 48)
             Image(systemName: type.symbolName)
+                .resizable()
+                .scaledToFit()
                 .foregroundStyle(.white)
-                .font(.title3)
+                .frame(width: 24, height: 24)
         }
     }
 }

@@ -27,11 +27,11 @@ class PersistenceManager {
         }
         
         if shouldLoadSampleData {
-            loadSampleData()
+            Task { await loadSampleData() }
         }
     }
     
-    func loadSampleData() {
+    func loadSampleData() async {
         let sessions = ChargeSession.sampleData
         for session in sessions {
             context.insert(session)
@@ -53,8 +53,10 @@ struct EmptyPersistencePreview: PreviewModifier {
 }
 
 struct SampleDataPersistencePreview: PreviewModifier {
-    static func makeSharedContext() throws -> PersistenceManager {
-        PersistenceManager(isStoredInMemoryOnly: true, shouldLoadSampleData: true)
+    static func makeSharedContext() async throws -> PersistenceManager {
+        let manager = PersistenceManager(isStoredInMemoryOnly: true, shouldLoadSampleData: false)
+        await manager.loadSampleData()
+        return manager
     }
     
     func body(content: Content, context: PersistenceManager) -> some View {

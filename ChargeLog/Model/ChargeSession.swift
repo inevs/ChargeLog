@@ -76,7 +76,7 @@ enum SessionStatus: String, Codable {
 }
 
 extension ChargeSession {
-    static var sampleData: [ChargeSession] = {
+    static var sampleData: [ChargeSession] {
         let stations = ChargeStation.sampleData
         let tariffs = ChargeTariff.sampleData
 
@@ -107,5 +107,5 @@ extension ChargeSession {
         // session4 is still in progress — no endTime, no socEnd
 
         return [session1, session2, session3, session4]
-    }()
+    }
 }
