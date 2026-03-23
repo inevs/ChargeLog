@@ -1,12 +1,21 @@
 import SwiftUI
 import SwiftData
 
-struct ChargingSessionsListView: View {
+struct ChargeSessionsListView: View {
     @Environment(\.modelContext) private var modelContext
     @State private var showAddSessionSheet = false
+    @State private var selectedVehicle: Vehicle? = nil
 
     @Query(sort: \ChargeSession.startTime, order: .reverse)
     private var chargeSessions: [ChargeSession]
+
+    @Query(sort: \Vehicle.brand)
+    private var vehicles: [Vehicle]
+
+    private var filteredSessions: [ChargeSession] {
+        guard let vehicle = selectedVehicle else { return chargeSessions }
+        return chargeSessions.filter { $0.vehicle?.id == vehicle.id }
+    }
 
     private var hasRunningSession: Bool {
         chargeSessions.contains { $0.sessionStatus == .running }
@@ -15,7 +24,7 @@ struct ChargingSessionsListView: View {
     var body: some View {
         NavigationStack {
             Group {
-                if chargeSessions.isEmpty {
+                if filteredSessions.isEmpty {
                     emptyState
                 } else {
                     sessionList
@@ -26,6 +35,34 @@ struct ChargingSessionsListView: View {
                 ChargeSessionDetailView(session: session)
             }
             .toolbar {
+                if vehicles.count > 1 {
+                    ToolbarItem(placement: .topBarLeading) {
+                        Menu {
+                            Button {
+                                selectedVehicle = nil
+                            } label: {
+                                Label("Alle Fahrzeuge", systemImage: selectedVehicle == nil ? "checkmark" : "car.2")
+                            }
+                            Divider()
+                            ForEach(vehicles) { vehicle in
+                                Button {
+                                    selectedVehicle = vehicle
+                                } label: {
+                                    Label(vehicle.displayName, systemImage: selectedVehicle?.id == vehicle.id ? "checkmark" : "car")
+                                }
+                            }
+                        } label: {
+                            HStack(spacing: 4) {
+                                Image(systemName: "car")
+                                if let vehicle = selectedVehicle {
+                                    Text(vehicle.displayName)
+                                        .font(.subheadline)
+                                }
+                            }
+                            .foregroundStyle(selectedVehicle != nil ? Color.accentColor : Color.primary)
+                        }
+                    }
+                }
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
                         showAddSessionSheet = true
@@ -45,7 +82,7 @@ struct ChargingSessionsListView: View {
     private var sessionList: some View {
         ScrollView {
             LazyVStack(spacing: 12) {
-                ForEach(chargeSessions) { session in
+                ForEach(filteredSessions) { session in
                     NavigationLink(value: session) {
                         ChargeSessionRow(session: session)
                     }
@@ -60,18 +97,31 @@ struct ChargingSessionsListView: View {
 
     @ViewBuilder
     private var emptyState: some View {
-        ContentUnavailableView {
-            Label("Keine Ladevorgänge", systemImage: "bolt.car")
-        } description: {
-            Text("Füge deinen ersten Ladevorgang hinzu")
-        } actions: {
-            Button {
-                showAddSessionSheet = true
-            } label: {
-                Label("Ladevorgang hinzufügen", systemImage: "plus")
+        if let vehicle = selectedVehicle {
+            ContentUnavailableView {
+                Label("Keine Ladevorgänge", systemImage: "bolt.car")
+            } description: {
+                Text("Keine Ladevorgänge für \(vehicle.displayName)")
+            } actions: {
+                Button("Filter entfernen") {
+                    selectedVehicle = nil
+                }
+                .buttonStyle(.bordered)
             }
-            .buttonStyle(.borderedProminent)
-            .tint(Color("Electric Blue"))
+        } else {
+            ContentUnavailableView {
+                Label("Keine Ladevorgänge", systemImage: "bolt.car")
+            } description: {
+                Text("Füge deinen ersten Ladevorgang hinzu")
+            } actions: {
+                Button {
+                    showAddSessionSheet = true
+                } label: {
+                    Label("Ladevorgang hinzufügen", systemImage: "plus")
+                }
+                .buttonStyle(.borderedProminent)
+                .tint(Color("Electric Blue"))
+            }
         }
     }
 }
@@ -89,10 +139,16 @@ struct ChargeSessionRow: View {
                         .font(.headline)
                         .foregroundStyle(.primary)
                         .lineLimit(1)
-                    Text(session.startTime.formatted(.dateTime.day().month(.twoDigits).year(.twoDigits).hour().minute()))
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
-                        .lineLimit(1)
+                    HStack(spacing: 4) {
+                        Text(session.startTime.formatted(.dateTime.day().month(.twoDigits).year(.twoDigits).hour().minute()))
+                        if let vehicle = session.vehicle {
+                            Text("·")
+                            Text(vehicle.displayName)
+                        }
+                    }
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(1)
                 }
                 .fixedSize(horizontal: false, vertical: true)
 
@@ -203,9 +259,9 @@ struct StatusBadge: View {
 
 
 #Preview("Empty State", traits: .modifier(EmptyPersistencePreview())) {
-    ChargingSessionsListView()
+    ChargeSessionsListView()
 }
 
 #Preview("Sample Data", traits: .modifier(SampleDataPersistencePreview())) {
-    ChargingSessionsListView()
+    ChargeSessionsListView()
 }

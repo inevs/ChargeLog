@@ -8,6 +8,9 @@ class Vehicle: Identifiable {
     var model: String
     var odometerKm: Int
     var batteryCapacityKwh: Double
+    var chargeSessions: [ChargeSession]
+    var createdAt: Date = Date()
+    var updatedAt: Date = Date()
     
     init(brand: String, model: String, odometerKm: Int, batteryCapacityKwh: Double) {
         self.id = UUID()
@@ -15,6 +18,9 @@ class Vehicle: Identifiable {
         self.model = model
         self.odometerKm = odometerKm
         self.batteryCapacityKwh = batteryCapacityKwh
+        self.chargeSessions = []
+        self.createdAt = .now
+        self.updatedAt = .now
     }
 }
 

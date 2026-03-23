@@ -15,7 +15,7 @@ struct MainView: View {
                 }
             }
             Tab("Sessions", systemImage: "clock.fill") {
-                ChargingSessionsListView()
+                ChargeSessionsListView()
             }
             Tab("Settings", systemImage: "gearshape.fill") {
                 SettingsView()

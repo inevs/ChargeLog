@@ -8,6 +8,7 @@ struct ChargeSessionDetailView: View {
 
     @Query(sort: \ChargeStation.name) private var stations: [ChargeStation]
     @Query(sort: \ChargeTariff.name) private var tariffs: [ChargeTariff]
+    @Query(sort: \Vehicle.brand) private var vehicles: [Vehicle]
 
     @AppStorage("batteryCapacityKwh") private var batteryCapacityKwh: Double = 0
 
@@ -22,6 +23,7 @@ struct ChargeSessionDetailView: View {
     @State private var editSocEnd: Double = 0
     @State private var editStation: ChargeStation? = nil
     @State private var editTariff: ChargeTariff? = nil
+    @State private var editVehicle: Vehicle? = nil
     @State private var editStatus: SessionStatus = .finished
     @State private var editBilledDate: Date = .now
     @State private var editHasBilledDate: Bool = false
@@ -114,6 +116,9 @@ struct ChargeSessionDetailView: View {
         }
 
         Section("Fahrzeug") {
+            if let vehicle = session.vehicle {
+                LabeledContent("Fahrzeug", value: vehicle.displayName)
+            }
             LabeledContent("Kilometerstand", value: "\(session.odometerKm) km")
             LabeledContent("Start-SoC", value: "\(Int(session.socStart * 100)) %")
             if let socEnd = session.socEnd {
@@ -133,6 +138,15 @@ struct ChargeSessionDetailView: View {
 
     @ViewBuilder
     private var editingSections: some View {
+        Section("Fahrzeug") {
+            Picker("Fahrzeug", selection: $editVehicle) {
+                Text("Kein Fahrzeug").tag(Optional<Vehicle>(nil))
+                ForEach(vehicles) { vehicle in
+                    Text(vehicle.displayName).tag(Optional(vehicle))
+                }
+            }
+        }
+
         Section("Ladestation") {
             Picker("Station", selection: $editStation) {
                 ForEach(stations) { station in
@@ -236,6 +250,7 @@ struct ChargeSessionDetailView: View {
         editEnergyText = String(format: "%.1f", session.energyKwh).replacingOccurrences(of: ".", with: ",")
         editSocStart = session.socStart
         editSocEnd = session.socEnd ?? session.socStart
+        editVehicle = session.vehicle
         editStation = session.chargingStation
         editTariff = session.chargeTariff
         editStatus = session.sessionStatus == .running ? .finished : session.sessionStatus
@@ -252,6 +267,7 @@ struct ChargeSessionDetailView: View {
         session.energyKwh = editEnergyKwh
         session.socStart = editSocStart
         session.socEnd = editSocEnd
+        session.vehicle = editVehicle
         session.chargingStation = station
         session.chargeTariff = tariff
         session.sessionStatus = editStatus

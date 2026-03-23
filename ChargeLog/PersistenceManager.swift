@@ -37,10 +37,6 @@ class PersistenceManager {
         for session in sessions {
             context.insert(session)
         }
-        let vehicles = Vehicle.sampleData
-        for vehicle in vehicles {
-            context.insert(vehicle)
-        }
         try? context.save()
     }
 }

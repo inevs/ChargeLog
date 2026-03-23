@@ -15,10 +15,11 @@ class ChargeSession {
     var sessionStatus: SessionStatus
     var chargingStation: ChargeStation
     var chargeTariff: ChargeTariff
+    var vehicle: Vehicle?
     var createdAt: Date = Date()
     var updatedAt: Date = Date()
     
-    init(odometerKm: Int, socStart: Double, chargingStation: ChargeStation, chargeTariff: ChargeTariff) {
+    init(odometerKm: Int, socStart: Double, chargingStation: ChargeStation, chargeTariff: ChargeTariff, vehicle: Vehicle? = nil) {
         self.id = UUID()
         self.startTime = Date()
         self.endTime = nil
@@ -30,6 +31,7 @@ class ChargeSession {
         self.sessionStatus = .running
         self.chargingStation = chargingStation
         self.chargeTariff = chargeTariff
+        self.vehicle = vehicle
         self.createdAt = .now
         self.updatedAt = .now
     }
@@ -79,8 +81,9 @@ extension ChargeSession {
     static var sampleData: [ChargeSession] {
         let stations = ChargeStation.sampleData
         let tariffs = ChargeTariff.sampleData
+        let vehicles = Vehicle.sampleData
 
-        let session1 = ChargeSession(odometerKm: 12400, socStart: 0.18, chargingStation: stations[0], chargeTariff: tariffs[1])
+        let session1 = ChargeSession(odometerKm: 34_100, socStart: 0.18, chargingStation: stations[0], chargeTariff: tariffs[1], vehicle: vehicles[0])
         session1.endTime = Date(timeIntervalSinceNow: -3600 * 24 * 5)
         session1.startTime = Date(timeIntervalSinceNow: -3600 * 24 * 5 - 2700)
         session1.energyKwh = 52.4
@@ -88,7 +91,7 @@ extension ChargeSession {
         session1.sessionStatus = .paid
         session1.billedDate = Date(timeIntervalSinceNow: -3600 * 24 * 3)
 
-        let session2 = ChargeSession(odometerKm: 12850, socStart: 0.22, chargingStation: stations[1], chargeTariff: tariffs[0])
+        let session2 = ChargeSession(odometerKm: 34_350, socStart: 0.22, chargingStation: stations[1], chargeTariff: tariffs[0], vehicle: vehicles[0])
         session2.endTime = Date(timeIntervalSinceNow: -3600 * 24 * 2)
         session2.startTime = Date(timeIntervalSinceNow: -3600 * 24 * 2 - 1800)
         session2.energyKwh = 38.7
@@ -96,14 +99,14 @@ extension ChargeSession {
         session2.sessionStatus = .paid
         session2.billedDate = Date(timeIntervalSinceNow: -3600 * 24 * 1)
 
-        let session3 = ChargeSession(odometerKm: 13200, socStart: 0.31, chargingStation: stations[2], chargeTariff: tariffs[2])
+        let session3 = ChargeSession(odometerKm: 17_900, socStart: 0.12, chargingStation: stations[2], chargeTariff: tariffs[2], vehicle: vehicles[1])
         session3.endTime = Date(timeIntervalSinceNow: -3600 * 5)
         session3.startTime = Date(timeIntervalSinceNow: -3600 * 5 - 3600)
         session3.energyKwh = 61.0
         session3.socEnd = 0.95
         session3.sessionStatus = .finished
 
-        let session4 = ChargeSession(odometerKm: 13250, socStart: 0.15, chargingStation: stations[4], chargeTariff: tariffs[4])
+        let session4 = ChargeSession(odometerKm: 34_500, socStart: 0.15, chargingStation: stations[4], chargeTariff: tariffs[4], vehicle: vehicles[0])
         // session4 is still in progress — no endTime, no socEnd
 
         return [session1, session2, session3, session4]

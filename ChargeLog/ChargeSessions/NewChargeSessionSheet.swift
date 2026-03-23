@@ -7,12 +7,14 @@ struct NewChargeSessionSheet: View {
 
     @Query(sort: \ChargeStation.name) private var stations: [ChargeStation]
     @Query(sort: \ChargeTariff.name) private var tariffs: [ChargeTariff]
+    @Query(sort: \Vehicle.createdAt, order: .reverse) private var vehicles: [Vehicle]
 
     @AppStorage("stationPickerFavoritesOnly") private var stationFavoritesOnly: Bool = false
     @AppStorage("tariffPickerFavoritesOnly") private var tariffFavoritesOnly: Bool = false
 
     @State private var selectedStation: ChargeStation?
     @State private var selectedTariff: ChargeTariff?
+    @State private var selectedVehicle: Vehicle?
 
     private var visibleStations: [ChargeStation] {
         stationFavoritesOnly ? stations.filter { $0.isFavorite } : stations
@@ -28,12 +30,29 @@ struct NewChargeSessionSheet: View {
     @State private var showNewTariffSheet = false
 
     private var canStart: Bool {
-        selectedStation != nil && selectedTariff != nil && odometerKm > 0
+        selectedStation != nil && selectedTariff != nil && selectedVehicle != nil && odometerKm > 0
     }
 
     var body: some View {
         NavigationStack {
             Form {
+                Section("Fahrzeug") {
+                    if vehicles.isEmpty {
+                        NavigationLink {
+                            VehicleListView()
+                        } label: {
+                            Label("Kein Fahrzeug vorhanden – jetzt anlegen", systemImage: "car")
+                                .foregroundStyle(.secondary)
+                        }
+                    } else {
+                        Picker("Fahrzeug", selection: $selectedVehicle) {
+                            ForEach(vehicles) { vehicle in
+                                Text(vehicle.displayName).tag(Optional(vehicle))
+                            }
+                        }
+                    }
+                }
+
                 Section {
                     if visibleStations.isEmpty {
                         Text(stationFavoritesOnly ? "Keine Favoriten vorhanden" : "Keine Ladestationen vorhanden")
@@ -158,6 +177,7 @@ struct NewChargeSessionSheet: View {
                 }
             }
             .onAppear {
+                if selectedVehicle == nil { selectedVehicle = vehicles.first }
                 if selectedStation == nil { selectedStation = visibleStations.first }
                 if selectedTariff == nil { selectedTariff = visibleTariffs.first }
             }
@@ -175,13 +195,14 @@ struct NewChargeSessionSheet: View {
     }
 
     private func startSession() {
-        guard let station = selectedStation, let tariff = selectedTariff, odometerKm > 0 else { return }
+        guard let station = selectedStation, let tariff = selectedTariff, let vehicle = selectedVehicle, odometerKm > 0 else { return }
 
         let session = ChargeSession(
             odometerKm: odometerKm,
             socStart: socStart,
             chargingStation: station,
-            chargeTariff: tariff
+            chargeTariff: tariff,
+            vehicle: vehicle
         )
         modelContext.insert(session)
         try? modelContext.save()

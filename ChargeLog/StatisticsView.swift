@@ -70,6 +70,31 @@ struct StatisticsView: View {
         return dict.map { (name: $0.key, count: $0.value) }.sorted { $0.count > $1.count }
     }
 
+    private struct VehicleStat: Identifiable {
+        let id: UUID
+        let name: String
+        let sessionCount: Int
+        let totalEnergyKwh: Double
+        let totalCost: Double
+        var avgEnergyKwh: Double { sessionCount > 0 ? totalEnergyKwh / Double(sessionCount) : 0 }
+    }
+
+    private var vehicleStats: [VehicleStat] {
+        var dict: [UUID: VehicleStat] = [:]
+        for session in finishedSessions {
+            guard let vehicle = session.vehicle else { continue }
+            let existing = dict[vehicle.id]
+            dict[vehicle.id] = VehicleStat(
+                id: vehicle.id,
+                name: vehicle.displayName,
+                sessionCount: (existing?.sessionCount ?? 0) + 1,
+                totalEnergyKwh: (existing?.totalEnergyKwh ?? 0) + session.energyKwh,
+                totalCost: (existing?.totalCost ?? 0) + session.amount
+            )
+        }
+        return dict.values.sorted { $0.totalEnergyKwh > $1.totalEnergyKwh }
+    }
+
     var body: some View {
         NavigationStack {
             ScrollView {
@@ -222,6 +247,102 @@ struct StatisticsView: View {
             .padding(.vertical, 4)
         }
         .padding(.horizontal)
+
+        // Fahrzeugstatistiken
+        if vehicleStats.count > 1 {
+            vehicleStatsSection
+        } else if let stat = vehicleStats.first {
+            singleVehicleSection(stat)
+        }
+    }
+
+    @ViewBuilder
+    private var vehicleStatsSection: some View {
+        ChartCard(title: "Energie nach Fahrzeug", icon: "car.fill") {
+            Chart(vehicleStats) { stat in
+                BarMark(
+                    x: .value("kWh", stat.totalEnergyKwh),
+                    y: .value("Fahrzeug", stat.name)
+                )
+                .foregroundStyle(Color("Electric Blue").gradient)
+                .cornerRadius(4)
+            }
+            .chartXAxis {
+                AxisMarks { value in
+                    AxisValueLabel {
+                        if let kwh = value.as(Double.self) {
+                            Text("\(kwh.formatted(.number.precision(.fractionLength(0)))) kWh")
+                                .font(.caption2)
+                        }
+                    }
+                    AxisGridLine()
+                }
+            }
+            .frame(height: CGFloat(vehicleStats.count) * 52 + 20)
+        }
+        .padding(.horizontal)
+
+        ChartCard(title: "Kosten nach Fahrzeug", icon: "eurosign.circle.fill") {
+            Chart(vehicleStats) { stat in
+                BarMark(
+                    x: .value("EUR", stat.totalCost),
+                    y: .value("Fahrzeug", stat.name)
+                )
+                .foregroundStyle(Color("Growth Green").gradient)
+                .cornerRadius(4)
+            }
+            .chartXAxis {
+                AxisMarks { value in
+                    AxisValueLabel {
+                        if let eur = value.as(Double.self) {
+                            Text(eur.formatted(.currency(code: "EUR")))
+                                .font(.caption2)
+                        }
+                    }
+                    AxisGridLine()
+                }
+            }
+            .frame(height: CGFloat(vehicleStats.count) * 52 + 20)
+        }
+        .padding(.horizontal)
+
+        ChartCard(title: "Ladevorgänge nach Fahrzeug", icon: "bolt.circle.fill") {
+            Chart(vehicleStats) { stat in
+                BarMark(
+                    x: .value("Anzahl", stat.sessionCount),
+                    y: .value("Fahrzeug", stat.name)
+                )
+                .foregroundStyle(Color("Amber Energy").gradient)
+                .cornerRadius(4)
+            }
+            .chartXAxis {
+                AxisMarks(values: .stride(by: 1)) { value in
+                    AxisValueLabel {
+                        if let count = value.as(Int.self) {
+                            Text("\(count)x").font(.caption2)
+                        }
+                    }
+                    AxisGridLine()
+                }
+            }
+            .frame(height: CGFloat(vehicleStats.count) * 52 + 20)
+        }
+        .padding(.horizontal)
+    }
+
+    @ViewBuilder
+    private func singleVehicleSection(_ stat: VehicleStat) -> some View {
+        ChartCard(title: stat.name, icon: "car.fill") {
+            HStack(spacing: 0) {
+                VehicleKPI(label: "Ladevorgänge", value: "\(stat.sessionCount)", unit: "×")
+                Divider().frame(height: 40)
+                VehicleKPI(label: "Ø pro Ladung", value: stat.avgEnergyKwh.formatted(.number.precision(.fractionLength(1))), unit: "kWh")
+                Divider().frame(height: 40)
+                VehicleKPI(label: "Gesamtkosten", value: stat.totalCost.formatted(.currency(code: "EUR")), unit: nil)
+            }
+            .padding(.vertical, 4)
+        }
+        .padding(.horizontal)
     }
 }
 
@@ -322,6 +443,35 @@ private struct ChartCard<Content: View>: View {
         .padding()
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 16))
+    }
+}
+
+// MARK: - VehicleKPI
+
+private struct VehicleKPI: View {
+    let label: String
+    let value: String
+    let unit: String?
+
+    var body: some View {
+        VStack(spacing: 2) {
+            HStack(alignment: .lastTextBaseline, spacing: 2) {
+                Text(value)
+                    .font(.title3.weight(.bold).monospacedDigit())
+                    .foregroundStyle(.primary)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
+                if let unit {
+                    Text(unit)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+            }
+            Text(label)
+                .font(.caption2)
+                .foregroundStyle(.secondary)
+        }
+        .frame(maxWidth: .infinity)
     }
 }
 
