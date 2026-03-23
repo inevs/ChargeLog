@@ -188,14 +188,14 @@ struct StatusBadge: View {
             .font(.caption)
             .fontWeight(.semibold)
             .frame(width: 64)
-            .padding(.vertical, 5)
+            .padding(5)
         .foregroundStyle(status.foregroundStyle)
         .background(
-            RoundedRectangle(cornerRadius: 20)
+            RoundedRectangle(cornerRadius: 8)
                 .fill(status.backgroundFill)
         )
         .overlay(
-            RoundedRectangle(cornerRadius: 20)
+            RoundedRectangle(cornerRadius: 8)
                 .stroke(status.backgroundOverlay, lineWidth: 1)
         )
     }

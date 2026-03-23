@@ -6,13 +6,11 @@ struct EndChargeSessionSheet: View {
 
     let session: ChargeSession
 
-    // Felder aus dem Start – korrigierbar
     @State private var startTime: Date
     @State private var odometerKm: Int
     @State private var odometerText: String
     @State private var socStart: Double
 
-    // Neue Felder beim Beenden
     @State private var endTime: Date = .now
     @State private var energyKwhText: String
     @State private var socEnd: Double
@@ -32,7 +30,6 @@ struct EndChargeSessionSheet: View {
         Double(energyKwhText.replacingOccurrences(of: ",", with: ".")) ?? 0
     }
 
-    /// Berechnet Energie aus SoC-Delta und Batteriegröße (falls konfiguriert)
     private var calculatedEnergyKwh: Double? {
         guard batteryCapacityKwh > 0 else { return nil }
         let delta = socEnd - socStart
@@ -133,8 +130,6 @@ struct EndChargeSessionSheet: View {
         }
     }
 
-    /// Füllt das Energie-Textfeld mit dem aus SoC-Delta berechneten Wert vor,
-    /// sofern der Nutzer noch keinen eigenen Wert eingetragen hat.
     private func updateCalculatedEnergy() {
         guard let calculated = calculatedEnergyKwh else { return }
         energyKwhText = String(format: "%.1f", calculated).replacingOccurrences(of: ".", with: ",")

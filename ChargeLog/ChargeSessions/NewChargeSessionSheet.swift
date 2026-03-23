@@ -69,7 +69,7 @@ struct NewChargeSessionSheet: View {
                             )
                             .labelStyle(.titleAndIcon)
                             .font(.caption)
-                            .foregroundStyle(stationFavoritesOnly ? .yellow : .secondary)
+                            .foregroundStyle(stationFavoritesOnly ? .electricBlue : .secondary)
                         }
                     }
                 }
@@ -109,7 +109,7 @@ struct NewChargeSessionSheet: View {
                             )
                             .labelStyle(.titleAndIcon)
                             .font(.caption)
-                            .foregroundStyle(tariffFavoritesOnly ? .yellow : .secondary)
+                            .foregroundStyle(tariffFavoritesOnly ? .electricBlue : .secondary)
                         }
                     }
                 }

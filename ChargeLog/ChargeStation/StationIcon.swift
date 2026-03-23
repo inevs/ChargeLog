@@ -22,5 +22,6 @@ struct StationIcon: View {
         StationIcon(type: .fastDC)
         StationIcon(type: .powerDC)
         StationIcon(type: .standardAC)
+        StationIcon(type: .wallbox)
     }
 }

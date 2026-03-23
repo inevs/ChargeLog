@@ -13,7 +13,6 @@ struct ChargeSessionDetailView: View {
 
     @State private var isEditing = false
 
-    // Bearbeitungsfelder
     @State private var editStartTime: Date = .now
     @State private var editEndTime: Date = .now
     @State private var editOdometerText: String = ""
@@ -31,7 +30,6 @@ struct ChargeSessionDetailView: View {
         Double(editEnergyText.replacingOccurrences(of: ",", with: ".")) ?? 0
     }
 
-    /// Berechnet Energie aus SoC-Delta und Batteriegröße (falls konfiguriert)
     private var calculatedEnergyKwh: Double? {
         guard batteryCapacityKwh > 0 else { return nil }
         let delta = editSocEnd - editSocStart
@@ -43,7 +41,6 @@ struct ChargeSessionDetailView: View {
         editStation != nil && editTariff != nil && editOdometerKm > 0 && editEndTime >= editStartTime
     }
 
-    // Berechnete Werte für Anzeige
     private var duration: String? {
         guard let end = session.endTime else { return nil }
         let seconds = Int(end.timeIntervalSince(session.startTime))
@@ -55,7 +52,6 @@ struct ChargeSessionDetailView: View {
 
     var body: some View {
         List {
-            // Header
             Section {
                 HStack(spacing: 16) {
                     StationIcon(type: session.chargingStation.type)
@@ -98,8 +94,6 @@ struct ChargeSessionDetailView: View {
         }
     }
 
-    // MARK: - Detail Sections
-
     @ViewBuilder
     private var detailSections: some View {
         Section("Zeitraum") {
@@ -136,8 +130,6 @@ struct ChargeSessionDetailView: View {
             LabeledContent("Geändert", value: session.updatedAt.formatted(date: .abbreviated, time: .omitted))
         }
     }
-
-    // MARK: - Editing Sections
 
     @ViewBuilder
     private var editingSections: some View {
@@ -235,8 +227,6 @@ struct ChargeSessionDetailView: View {
             }
         }
     }
-
-    // MARK: - Actions
 
     private func startEditing() {
         editStartTime = session.startTime

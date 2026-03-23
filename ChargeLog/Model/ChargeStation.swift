@@ -25,13 +25,14 @@ class ChargeStation {
 }
 
 enum ChargeStationType: String, Codable, CaseIterable {
-    case standardAC, fastDC, powerDC
+    case standardAC, fastDC, powerDC, wallbox
     
     var symbolName: String {
         switch self {
         case .standardAC: return "powercord"
         case .fastDC: return "bolt"
         case .powerDC: return "bolt.square"
+        case .wallbox: return "bolt.house"
         }
     }
     
@@ -40,6 +41,7 @@ enum ChargeStationType: String, Codable, CaseIterable {
         case .powerDC: "Amber Energy"
         case .fastDC:  "Electric Blue"
         case .standardAC: "Growth Green"
+        case .wallbox: "Violet Charge"
         }
     }
     
@@ -48,6 +50,7 @@ enum ChargeStationType: String, Codable, CaseIterable {
         case .standardAC: "AC Standard"
         case .fastDC: "DC Schnelllader"
         case .powerDC: "DC High Power"
+        case .wallbox: "Wallbox"
         }
     }
 }
@@ -67,6 +70,9 @@ extension ChargeStation {
         let cologne = ChargeStation(name: "Fastned Cologne", locationLat: 50.9333, locationLong: 6.9500, type: .fastDC)
         cologne.isFavorite = true
 
-        return [munich, hamburg, berlin, frankfurt, cologne]
+        let home = ChargeStation(name: "Heimische Wallbox", locationLat: 48.7758, locationLong: 9.1829, type: .wallbox)
+        home.isFavorite = true
+
+        return [munich, hamburg, berlin, frankfurt, cologne, home]
     }
 }

@@ -44,7 +44,7 @@ struct ChargeStationDetailView: View {
                     Spacer()
                     if !isEditing {
                         Image(systemName: station.isFavorite ? "star.fill" : "star")
-                            .foregroundStyle(station.isFavorite ? Color.yellow : Color.secondary.opacity(0.4))
+                            .foregroundStyle(station.isFavorite ? .electricBlue : Color.secondary.opacity(0.4))
                     }
                 }
                 .padding(.vertical, 4)
@@ -100,19 +100,20 @@ struct ChargeStationDetailView: View {
             } else {
                 Section("Details") {
                     LabeledContent("Typ", value: station.type.label)
-                    Toggle(isOn: Binding(
-                        get: { station.isFavorite },
-                        set: { newValue in
-                            station.isFavorite = newValue
-                            station.updatedAt = .now
-                            try? modelContext.save()
+                    Button {
+                        station.isFavorite.toggle()
+                        station.updatedAt = .now
+                        try? modelContext.save()
+                    } label: {
+                        LabeledContent("Favorit") {
+                            if station.isFavorite {
+                                Image(systemName: "checkmark")
+                                    .foregroundStyle(.electricBlue)
+                                    .fontWeight(.semibold)
+                            }
                         }
-                    )) {
-                        Label("Favorit", systemImage: "star")
                     }
-                    .tint(.yellow)
-                    LabeledContent("Hinzugefügt", value: station.createdAt.formatted(date: .abbreviated, time: .omitted))
-                    LabeledContent("Zuletzt geändert", value: station.updatedAt.formatted(date: .abbreviated, time: .omitted))
+                    .foregroundStyle(.primary)
                 }
 
                 if let coord = savedCoordinate {
