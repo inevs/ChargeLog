@@ -84,12 +84,11 @@ struct ChargeSessionRow: View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(alignment: .center, spacing: 12) {
                 StationIcon(type: session.chargingStation.type)
-                    .fixedSize()
                 VStack(alignment: .leading, spacing: 2) {
                     Text(session.chargingStation.name)
                         .font(.headline)
                         .foregroundStyle(.primary)
-                        .lineLimit(2)
+                        .lineLimit(1)
                     Text(session.startTime.formatted(.dateTime.day().month(.twoDigits).year(.twoDigits).hour().minute()))
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
@@ -105,10 +104,6 @@ struct ChargeSessionRow: View {
             Divider()
 
             HStack(alignment: .top, spacing: 24) {
-                // Einrücken auf Breite des StationIcon (48) + spacing (12)
-                Color.clear
-                    .frame(width: 48 + 12, height: 0)
-
                 MetricColumn(
                     label: "ENERGIE",
                     value: String(format: "%.1f", session.energyKwh),
@@ -124,21 +119,19 @@ struct ChargeSessionRow: View {
 
                 switch session.sessionStatus {
                 case .running:
-                    Button("Beenden") {
+                    Button("", systemImage: "stop.circle") {
                         showEndSheet = true
                     }
-                    .buttonStyle(.borderedProminent)
-                    .controlSize(.regular)
+                    .controlSize(.large)
                     .tint(Color("Electric Blue"))
-                    .lineLimit(1)
                     .fixedSize()
                 case .finished:
-                    Button("Bezahlen") {}
-                        .buttonStyle(.borderedProminent)
-                        .controlSize(.regular)
-                        .tint(Color("Growth Green"))
-                        .lineLimit(1)
-                        .fixedSize()
+                    Button("", systemImage: "eurosign.circle.fill") {
+                        session.sessionStatus = .paid
+                    }
+                    .controlSize(.large)
+                    .tint(Color("Growth Green"))
+                    .fixedSize()
                 case .paid:
                     EmptyView()
                 }
