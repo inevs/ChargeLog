@@ -74,6 +74,15 @@ struct ChargeSessionsListView: View {
                     }
                 }
                 ToolbarItem(placement: .topBarTrailing) {
+                    ShareLink(
+                        item: CSVExporter.csv(from: chargeSessions),
+                        preview: SharePreview("Ladevorgänge exportieren", image: Image(systemName: "square.and.arrow.up"))
+                    ) {
+                        Image(systemName: "square.and.arrow.up")
+                    }
+                    .disabled(chargeSessions.isEmpty)
+                }
+                ToolbarItem(placement: .topBarTrailing) {
                     Button {
                         showAddSessionSheet = true
                     } label: {
