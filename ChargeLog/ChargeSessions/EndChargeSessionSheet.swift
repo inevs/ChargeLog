@@ -2,7 +2,6 @@ import SwiftUI
 
 struct EndChargeSessionSheet: View {
     @Environment(\.dismiss) private var dismiss
-    @AppStorage("batteryCapacityKwh") private var batteryCapacityKwh: Double = 0
 
     let session: ChargeSession
 
@@ -31,10 +30,10 @@ struct EndChargeSessionSheet: View {
     }
 
     private var calculatedEnergyKwh: Double? {
-        guard batteryCapacityKwh > 0 else { return nil }
+        guard let capacity = session.vehicle?.batteryCapacityKwh, capacity > 0 else { return nil }
         let delta = socEnd - socStart
         guard delta > 0 else { return nil }
-        return delta * batteryCapacityKwh
+        return delta * capacity
     }
 
     private var canFinish: Bool {

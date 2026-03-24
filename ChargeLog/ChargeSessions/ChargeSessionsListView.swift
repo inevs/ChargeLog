@@ -21,6 +21,16 @@ struct ChargeSessionsListView: View {
         chargeSessions.contains { $0.sessionStatus == .running }
     }
 
+    private var unpaidAmount: Double {
+        filteredSessions
+            .filter { $0.sessionStatus == .finished }
+            .reduce(0) { $0 + $1.amount }
+    }
+
+    private var unpaidCount: Int {
+        filteredSessions.filter { $0.sessionStatus == .finished }.count
+    }
+
     var body: some View {
         NavigationStack {
             Group {
@@ -82,6 +92,9 @@ struct ChargeSessionsListView: View {
     private var sessionList: some View {
         ScrollView {
             LazyVStack(spacing: 12) {
+                if unpaidCount > 0 {
+                    unpaidBanner
+                }
                 ForEach(filteredSessions) { session in
                     NavigationLink(value: session) {
                         ChargeSessionRow(session: session)
@@ -93,6 +106,29 @@ struct ChargeSessionsListView: View {
             .padding(.vertical, 12)
         }
         .background(Color("background"))
+    }
+
+    @ViewBuilder
+    private var unpaidBanner: some View {
+        HStack(spacing: 12) {
+            Image(systemName: "eurosign.circle.fill")
+                .font(.title2)
+                .foregroundStyle(Color("Growth Green"))
+            VStack(alignment: .leading, spacing: 2) {
+                Text("Offen zur Abrechnung")
+                    .font(.subheadline.weight(.semibold))
+                Text(unpaidCount == 1 ? "1 Ladevorgang" : "\(unpaidCount) Ladevorgänge")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+            Spacer()
+            Text(unpaidAmount.formatted(.currency(code: "EUR")))
+                .font(.title3.weight(.bold).monospacedDigit())
+                .foregroundStyle(Color("Growth Green"))
+        }
+        .padding(14)
+        .background(Color("Growth Green").opacity(0.1), in: RoundedRectangle(cornerRadius: 16))
+        .overlay(RoundedRectangle(cornerRadius: 16).stroke(Color("Growth Green").opacity(0.25), lineWidth: 1))
     }
 
     @ViewBuilder

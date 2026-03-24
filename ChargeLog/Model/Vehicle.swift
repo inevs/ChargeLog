@@ -8,7 +8,7 @@ class Vehicle: Identifiable {
     var model: String
     var odometerKm: Int
     var batteryCapacityKwh: Double
-    var chargeSessions: [ChargeSession]
+    @Relationship(deleteRule: .nullify, inverse: \ChargeSession.vehicle) var chargeSessions: [ChargeSession]
     var createdAt: Date = Date()
     var updatedAt: Date = Date()
     

@@ -10,8 +10,6 @@ struct ChargeSessionDetailView: View {
     @Query(sort: \ChargeTariff.name) private var tariffs: [ChargeTariff]
     @Query(sort: \Vehicle.brand) private var vehicles: [Vehicle]
 
-    @AppStorage("batteryCapacityKwh") private var batteryCapacityKwh: Double = 0
-
     @State private var isEditing = false
 
     @State private var editStartTime: Date = .now
@@ -33,10 +31,10 @@ struct ChargeSessionDetailView: View {
     }
 
     private var calculatedEnergyKwh: Double? {
-        guard batteryCapacityKwh > 0 else { return nil }
+        guard let capacity = editVehicle?.batteryCapacityKwh, capacity > 0 else { return nil }
         let delta = editSocEnd - editSocStart
         guard delta > 0 else { return nil }
-        return delta * batteryCapacityKwh
+        return delta * capacity
     }
 
     private var canSave: Bool {

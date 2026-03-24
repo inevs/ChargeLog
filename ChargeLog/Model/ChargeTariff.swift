@@ -8,7 +8,7 @@ class ChargeTariff {
     var pricePerKwh: Double
     var basePrice: Double
     var isFavorite: Bool = false
-    var chargeSessions: [ChargeSession] = []
+    @Relationship(deleteRule: .nullify, inverse: \ChargeSession.chargeTariff) var chargeSessions: [ChargeSession] = []
     var createdAt: Date = Date()
     var updatedAt: Date = Date()
     

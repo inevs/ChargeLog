@@ -52,6 +52,12 @@ struct StatisticsView: View {
         return totalCost / totalEnergy
     }
 
+    private var unpaidAmount: Double {
+        allSessions
+            .filter { $0.sessionStatus == .finished }
+            .reduce(0) { $0 + $1.amount }
+    }
+
     private var dailyEnergyData: [(day: Date, energy: Double)] {
         let calendar = Calendar.current
         var dict: [Date: Double] = [:]

@@ -17,7 +17,6 @@ struct ChargeStationDetailView: View {
 
     private var canSave: Bool { !editName.trimmingCharacters(in: .whitespaces).isEmpty }
 
-    /// Gibt die gespeicherte Koordinate zurück, wenn sie gültig ist (nicht 0,0)
     private var savedCoordinate: CLLocationCoordinate2D? {
         guard station.locationLat != 0 || station.locationLong != 0 else { return nil }
         return CLLocationCoordinate2D(latitude: station.locationLat, longitude: station.locationLong)

@@ -25,12 +25,17 @@ struct NewChargeSessionSheet: View {
     @State private var socStart: Double = 0.2
     @State private var odometerKm: Int = 0
     @State private var odometerText: String = ""
+    @State private var odometerPlaceholder: String = ""
 
     @State private var showNewStationSheet = false
     @State private var showNewTariffSheet = false
 
+    private var effectiveOdometerKm: Int {
+        odometerKm > 0 ? odometerKm : (Int(odometerPlaceholder) ?? 0)
+    }
+
     private var canStart: Bool {
-        selectedStation != nil && selectedTariff != nil && selectedVehicle != nil && odometerKm > 0
+        selectedStation != nil && selectedTariff != nil && selectedVehicle != nil && effectiveOdometerKm > 0
     }
 
     var body: some View {
@@ -137,7 +142,7 @@ struct NewChargeSessionSheet: View {
                     HStack {
                         Text("Kilometerstand")
                         Spacer()
-                        TextField("", text: $odometerText)
+                        TextField(odometerPlaceholder, text: $odometerText)
                             .keyboardType(.numberPad)
                             .multilineTextAlignment(.trailing)
                             .onChange(of: odometerText) { _, newValue in
@@ -151,6 +156,11 @@ struct NewChargeSessionSheet: View {
                         HStack {
                             Text("Start-SoC")
                             Spacer()
+                            if let capacity = selectedVehicle?.batteryCapacityKwh {
+                                Text(String(format: "%.1f kWh", socStart * capacity))
+                                    .foregroundStyle(.secondary)
+                                    .monospacedDigit()
+                            }
                             Text("\(Int(socStart * 100)) %")
                                 .foregroundStyle(.secondary)
                                 .monospacedDigit()
@@ -180,6 +190,16 @@ struct NewChargeSessionSheet: View {
                 if selectedVehicle == nil { selectedVehicle = vehicles.first }
                 if selectedStation == nil { selectedStation = visibleStations.first }
                 if selectedTariff == nil { selectedTariff = visibleTariffs.first }
+                if let vehicle = selectedVehicle {
+                    odometerPlaceholder = "\(vehicle.odometerKm)"
+                }
+            }
+            .onChange(of: selectedVehicle) { _, newVehicle in
+                if let vehicle = newVehicle {
+                    odometerPlaceholder = "\(vehicle.odometerKm)"
+                    odometerText = ""
+                    odometerKm = 0
+                }
             }
             .sheet(isPresented: $showNewStationSheet) {
                 NewChargeStationSheet { newStation in
@@ -195,10 +215,14 @@ struct NewChargeSessionSheet: View {
     }
 
     private func startSession() {
-        guard let station = selectedStation, let tariff = selectedTariff, let vehicle = selectedVehicle, odometerKm > 0 else { return }
+        guard let station = selectedStation, let tariff = selectedTariff, let vehicle = selectedVehicle, effectiveOdometerKm > 0 else { return }
+
+        if odometerKm > 0 {
+            vehicle.odometerKm = odometerKm
+        }
 
         let session = ChargeSession(
-            odometerKm: odometerKm,
+            odometerKm: effectiveOdometerKm,
             socStart: socStart,
             chargingStation: station,
             chargeTariff: tariff,
