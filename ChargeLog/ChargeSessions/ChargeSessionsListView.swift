@@ -245,7 +245,7 @@ struct ChargeSessionRow: View {
         .padding(16)
         .background(Color("background"))
         .clipShape(RoundedRectangle(cornerRadius: 16))
-        .shadow(color: .black.opacity(0.06), radius: 6, x: 0, y: 2)
+        .shadow(color: Color(.label).opacity(0.06), radius: 6, x: 0, y: 2)
         .containerRelativeFrame(.horizontal) { width, _ in width - 32 }
         .sheet(isPresented: $showEndSheet) {
             EndChargeSessionSheet(session: session)

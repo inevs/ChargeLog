@@ -56,23 +56,23 @@ enum SessionStatus: String, Codable {
         switch self {
         case .running: Color.accentColor
         case .finished: Color.secondary
-        case .paid: Color(hue: 0.38, saturation: 0.75, brightness: 0.38)
+        case .paid: Color("Growth Green")
         }
     }
-    
+
     var backgroundFill: Color {
         switch self {
         case .running: Color.accentColor.opacity(0.15)
         case .finished: Color.secondary.opacity(0.12)
-        case .paid: Color(hue: 0.38, saturation: 0.65, brightness: 0.5).opacity(0.15)
+        case .paid: Color("Growth Green").opacity(0.15)
         }
     }
-    
+
     var backgroundOverlay: Color {
         switch self {
         case .running: Color.accentColor.opacity(0.55)
         case .finished: Color.secondary.opacity(0.45)
-        case .paid: Color(hue: 0.38, saturation: 0.65, brightness: 0.5).opacity(0.55)
+        case .paid: Color("Growth Green").opacity(0.55)
         }
     }
 }
