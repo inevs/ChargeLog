@@ -193,7 +193,7 @@ struct StatisticsView: View {
                         AxisValueLabel {
                             if let kwh = value.as(Double.self) {
                                 Text("\(kwh.formatted(.number.precision(.fractionLength(0)))) kWh")
-                                    .font(.caption2)
+                                    .font(.caption)
                             }
                         }
                         AxisGridLine()
@@ -220,7 +220,7 @@ struct StatisticsView: View {
                         AxisValueLabel {
                             if let count = value.as(Int.self) {
                                 Text("\(count)x")
-                                    .font(.caption2)
+                                    .font(.caption)
                             }
                         }
                         AxisGridLine()
@@ -236,7 +236,7 @@ struct StatisticsView: View {
             HStack(spacing: 16) {
                 VStack(alignment: .leading, spacing: 4) {
                     Text(averageEnergy.formatted(.number.precision(.fractionLength(1))))
-                        .font(.system(size: 40, weight: .bold, design: .rounded))
+                        .font(.largeTitle.bold())
                         .foregroundStyle(Color("Amber Energy"))
                     Text("kWh Ø")
                         .font(.subheadline)
@@ -278,7 +278,7 @@ struct StatisticsView: View {
                     AxisValueLabel {
                         if let kwh = value.as(Double.self) {
                             Text("\(kwh.formatted(.number.precision(.fractionLength(0)))) kWh")
-                                .font(.caption2)
+                                .font(.caption)
                         }
                     }
                     AxisGridLine()
@@ -302,7 +302,7 @@ struct StatisticsView: View {
                     AxisValueLabel {
                         if let eur = value.as(Double.self) {
                             Text(eur.formatted(.currency(code: "EUR")))
-                                .font(.caption2)
+                                .font(.caption)
                         }
                     }
                     AxisGridLine()
@@ -325,7 +325,7 @@ struct StatisticsView: View {
                 AxisMarks(values: .stride(by: 1)) { value in
                     AxisValueLabel {
                         if let count = value.as(Int.self) {
-                            Text("\(count)x").font(.caption2)
+                            Text("\(count)x").font(.caption)
                         }
                     }
                     AxisGridLine()
@@ -474,7 +474,7 @@ private struct VehicleKPI: View {
                 }
             }
             Text(label)
-                .font(.caption2)
+                .font(.caption)
                 .foregroundStyle(.secondary)
         }
         .frame(maxWidth: .infinity)

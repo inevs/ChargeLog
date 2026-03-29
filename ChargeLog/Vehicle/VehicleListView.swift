@@ -10,15 +10,18 @@ struct VehicleListView: View {
     var body: some View {
         List {
             ForEach(vehicles) { vehicle in
-                NavigationLink(destination: VehicleDetailView(vehicle: vehicle)) {
+                NavigationLink(value: vehicle) {
                     VehicleRow(vehicle: vehicle)
                 }
             }
             .onDelete(perform: deleteVehicles)
         }
         .navigationTitle("Fahrzeuge")
+        .navigationDestination(for: Vehicle.self) { vehicle in
+            VehicleDetailView(vehicle: vehicle)
+        }
         .toolbar {
-            ToolbarItem(placement: .navigationBarLeading) {
+            ToolbarItem(placement: .topBarLeading) {
                 EditButton()
             }
             ToolbarItem(placement: .primaryAction) {

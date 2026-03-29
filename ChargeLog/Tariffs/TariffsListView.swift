@@ -62,7 +62,7 @@ struct TariffsListView: View {
                 }
                 .tint(showFavoritesOnly ? .yellow : .accentColor)
             }
-            ToolbarItem(placement: .navigationBarLeading) {
+            ToolbarItem(placement: .topBarLeading) {
                 EditButton()
             }
         }

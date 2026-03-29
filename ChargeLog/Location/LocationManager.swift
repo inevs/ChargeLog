@@ -8,6 +8,7 @@ class LocationManager: NSObject {
 
     var currentLocation: CLLocationCoordinate2D?
     var authorizationStatus: CLAuthorizationStatus = .notDetermined
+    var lastError: String?
 
     override init() {
         super.init()
@@ -36,7 +37,9 @@ extension LocationManager: CLLocationManagerDelegate {
     }
 
     nonisolated func locationManager(_ manager: CLLocationManager, didFailWithError error: any Error) {
-        // Fehler beim Standort abrufen werden still ignoriert
+        Task { @MainActor in
+            lastError = error.localizedDescription
+        }
     }
 
     nonisolated func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {

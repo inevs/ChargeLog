@@ -45,8 +45,11 @@ struct ChargeStationListView: View {
             }
         }
         .navigationTitle("Ladestationen")
+        .navigationDestination(for: ChargeStation.self) { station in
+            ChargeStationDetailView(station: station)
+        }
         .toolbar {
-            ToolbarItem(placement: .navigationBarLeading) {
+            ToolbarItem(placement: .topBarLeading) {
                 EditButton()
             }
             ToolbarItem(placement: .topBarTrailing) {
@@ -81,7 +84,7 @@ struct ChargeStationListView: View {
 
     @ViewBuilder
     private func stationRow(_ station: ChargeStation) -> some View {
-        NavigationLink(destination: ChargeStationDetailView(station: station)) {
+        NavigationLink(value: station) {
             StationRow(station: station)
         }
         .swipeActions(edge: .leading) {

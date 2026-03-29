@@ -172,6 +172,7 @@ struct ChargeSessionsListView: View {
 }
 
 struct ChargeSessionRow: View {
+    @Environment(\.modelContext) private var modelContext
     let session: ChargeSession
     @State private var showEndSheet = false
 
@@ -220,16 +221,21 @@ struct ChargeSessionRow: View {
 
                 switch session.sessionStatus {
                 case .running:
-                    Button("", systemImage: "stop.circle") {
+                    Button("Ladevorgang beenden", systemImage: "stop.circle") {
                         showEndSheet = true
                     }
+                    .labelStyle(.iconOnly)
                     .controlSize(.large)
                     .tint(Color("Electric Blue"))
                     .fixedSize()
                 case .finished:
-                    Button("", systemImage: "eurosign.circle.fill") {
+                    Button("Als bezahlt markieren", systemImage: "eurosign.circle.fill") {
                         session.sessionStatus = .paid
+                        session.billedDate = .now
+                        session.updatedAt = .now
+                        try? modelContext.save()
                     }
+                    .labelStyle(.iconOnly)
                     .controlSize(.large)
                     .tint(Color("Growth Green"))
                     .fixedSize()
@@ -261,13 +267,13 @@ private struct MetricColumn: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 2) {
             Text(label)
-                .font(.caption2)
-                .fontWeight(.semibold)
+                .font(.caption)
+                .bold()
                 .foregroundStyle(.secondary)
             HStack(alignment: .lastTextBaseline, spacing: 2) {
                 Text(value)
                     .font(.title3)
-                    .fontWeight(.bold)
+                    .bold()
                     .foregroundStyle(.primary)
                 if let unit {
                     Text(unit)
@@ -287,7 +293,7 @@ struct StatusBadge: View {
     var body: some View {
         Text(status.name.uppercased())
             .font(.caption)
-            .fontWeight(.semibold)
+            .bold()
             .frame(width: 64)
             .padding(5)
         .foregroundStyle(status.foregroundStyle)

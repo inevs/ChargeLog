@@ -9,7 +9,7 @@ class ChargeStation {
     var locationLong: Double
     var type: ChargeStationType
     var isFavorite: Bool = false
-    @Relationship(deleteRule: .nullify, inverse: \ChargeSession.chargingStation) var chargeSessions: [ChargeSession] = []
+    @Relationship(deleteRule: .deny, inverse: \ChargeSession.chargingStation) var chargeSessions: [ChargeSession] = []
     var createdAt: Date = Date()
     var updatedAt: Date = Date()
     

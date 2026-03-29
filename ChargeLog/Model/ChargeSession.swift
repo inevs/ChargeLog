@@ -37,7 +37,7 @@ class ChargeSession {
     }
     
     @Transient var amount: Double {
-        self.energyKwh * self.chargeTariff.pricePerKwh
+        (energyKwh * chargeTariff.pricePerKwh) + chargeTariff.basePrice
     }
 }
 
